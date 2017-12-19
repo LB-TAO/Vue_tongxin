@@ -1,0 +1,78 @@
+/* reset.css */
+ul,li{
+    margin: 0px;padding: 0px;
+    list-style: none;
+}
+
+#im-login{
+    width: 300px;
+    height: 400px;
+    box-shadow: 0px 0px 5px 5px lightgrey;
+    margin: 0 auto;
+    margin-top: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+#im-login img{
+    width: 100px;
+    height: 100px;
+}
+
+#im-chat{
+    width: 800px;
+    height: 400px;
+    box-shadow: 0px 0px 5px 5px lightgrey;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+#im-left{
+    background-color: #333;
+    height: 400px;
+}
+#im-left img{
+    width: 40px;
+    height: 40px;
+}
+#im-left label{
+    font-size: 26px;
+    color:white;
+}
+
+#im-main{
+
+}
+#im-main img{
+    width: 50px;
+    height: 50px;
+}
+
+#im-messages{
+    width: 100%;
+    height: 280px;
+}
+
+#im-messages li{
+    overflow: hidden;
+}
+
+#im-messages span{
+    padding: 5px 3px;
+    background: #eee;
+    border:1px #999 solid;    
+}
+
+
+.im-send-msg *{
+    float: right;
+}
+
+.im-rec-msg *{
+    float: left;
+}
+
+#im-sendpanel textarea{
+    width: 100%;
+    height: 120px;
+}

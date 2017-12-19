@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- 引入bootstrap.css框架 -->
+    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.css">
+    <!-- 引入index.css样式 -->
+    <link rel="stylesheet" href="css/index.css">
+    <!-- 引入vue.js框架 -->
+    <script src="js/vue-2.4.js"></script>
+    <!-- 引入socket.io.js框架啊 -->
+    <script src="js/socket.io.js"></script>
+    <!-- 引入项目的js文件-->
+    <script src="js/im.js"></script>
+    <title>IM</title>
+</head>
+<body> 
+<div id="app">
+    <!-- 要区分好自己定义的选择器名和bootstrap给的选择器名。isLogin的作用在登录的时候切换登录界面和聊天界面 -->
+    <div id="im-login" v-if="!isLogin">
+        <!-- 流体布局 -->
+        <div class="container-fluid">
+            <!-- 可以设置多个行row -->
+            <div class="row">
+                <!-- col-md-12表示一列，col-md-8，col-md-4这表示两列 -->
+                <div class="col-md-12">
+                    <!-- icon 将label和input等的控件放在form-group中得到更好的排列-->
+                    <div class="form-group">
+                        <!-- v-bind绑定了src和它的值，只要有一个变另外一个就会改变。vue中的双引号里面是一个js表达式，是可以被解析的。所以，要写好这样的形式："'imgs/'+user+'.png'" -->
+                        <img v-bind:src="'imgs/'+user+'.png'" alt="" class="img-circle center-block">
+                    </div>
+                    <!-- 用户名 -->
+                    <div class="form-group">
+                        <!-- lazy是输入完之后失去焦点才触发，相当于change -->
+                        <input type="text" class="form-control" v-model.lazy="user">
+                    </div>
+                    <!-- 推荐好友 -->
+                    <div class="form-group">
+                        <!-- list-group，list-group-item创建一个列表组 -->
+                        <div class="list-group">
+                            <!-- v-for可以得到所有to的列表，index是数组recommends中元素位置的索引，active是bootstrap中的高亮样式，当点击中的元素位置匹配到自己的索引值active就会触发，相当table切换，selectUser就是实现的方法 -->
+                            <a href="###"
+                            v-for = "(to,index) in recommends"
+                            :class = "{'active':selectedIndex == index}"
+                            @click = "selectUser(index)"
+                            class="list-group-item">{{to}}</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 登录按钮 -->
+                    <div class="form-group">
+                        <!-- btn默认按钮，btn-info表示颜色，btn-block表示可以将其拉伸至父元素的宽度100% -->
+                        <button class="btn btn-info btn-block" @click="login">登录</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    
+    <!--v-else和上文的v-for一起使用，要在同一个等级 -->
+    <div id="im-chat" v-else>
+        <div class="container-fluid">
+            <div class="row">
+                <!-- left section -->
+                <!-- col-md-4 分了四列 ，占了im-chat三分之一的宽度-->
+                <div class="col-md-4" id="im-left">
+                    <!-- 携带一个row表示一行，在这里共携带了两个row，所以分成了两行，感觉和grid布局差不多，才可以分列 -->
+                    <div class="row">
+                        <!-- 在四列的基础上分成了12列，这里表示占了im-left全部的宽度-->
+                        <div class="col-md-12">
+                            <!-- img-round 图片形状成为圆角 -->
+                            <img :src="'imgs/'+user+'.png'" class="img-rounded">
+                            <label >{{user}}</label>
+                        </div>
+                    </div>
+                    <!-- 这是在im-left中分的第二行 -->
+                    <div class="row">
+                        <!-- col-md-12 这样表示只有一列 -->
+                        <div class="col-md-12">
+                            <table class="table table-hover">
+                                <tr>
+                                    <td>
+                                        <!-- img-rounded圆的形状变成圆角 -->
+                                        <img :src="'imgs/'+to+'.png'" class="img-rounded">
+                                        <label for="">{{to}}</label> 
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- main section ，col-md-8占了8列-->
+                <div class="col-md-8" id="im-main">
+                    <!-- 显示聊天信息 -->
+                    <!-- 分成了两行，这里是一行 -->
+                    <div class="row" >
+                        <ul id="im-messages">
+                            <!-- chats 是一个数组对象，chats中有from(user)，to(to)，消息msg-->
+                            <li v-for="chat in chats">
+                                <!-- 用户发的信息 -->
+                                <!-- im-send-msg是一个自定义的选择器， -->
+                                <div class="im-send-msg" v-if="chat.from == user">
+                                    <!-- img-circle图像变成了圆 -->
+                                    <img :src="'imgs/'+user+'.png'" class="img-circle">
+                                    <span style="border-radius:8px 8px 0px 8px">{{chat.msg}}</span>
+                                </div>
+                                <!-- 用户接受的信息 -->
+                                <div class="im-rec-msg" v-else>
+                                    <img :src="'imgs/'+to+'.png'" class="img-circle">
+                                    <span style="border-radius:8px 8px 8px 0px">{{chat.msg}}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- 信息发送区 -->
+                    <!-- 这里又是一行 -->
+                    <div class="row" id="im-sendpanel">
+                        <!-- placeholder是默认有字体的样式，@keyup.ctrl.enter 键盘事件，ctrl和enter的组合键 -->
+                        <textarea placeholder="ctrl+enter发信息..." 
+                        v-model="msg"
+                        @keyup.ctrl.enter = "sendMsg"
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+   
+</body>
+</html>
